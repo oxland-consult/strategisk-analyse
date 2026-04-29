@@ -224,10 +224,10 @@ footer { background: var(--green-dark); color: white; padding: 4rem 3rem 2rem; }
 <!-- EmailJS config — udfyld 4 værdier for at aktivere automatisk email-afsendelse -->
 <script>
 const EJ = {
-  publicKey:      'DIN_PUBLIC_KEY',
-  serviceId:      'DIN_SERVICE_ID',
-  tmplRespondent: 'DIN_RESPONDENT_TMPL',
-  tmplAdmin:      'DIN_ADMIN_TMPL',
+  publicKey:      'd1-schu3u8_EyCHfr',
+  serviceId:      'service_oxaxaj7',
+  tmplRespondent: 'template_7n9owy7',
+  tmplAdmin:      'template_d6uttw9',
   adminEmail:     'christian@oxland.dk',
 };
 const ejReady = !Object.values(EJ).some(v => String(v).startsWith('DIN_'));
@@ -792,8 +792,9 @@ function showResults(st){
   document.getElementById('rDesc').textContent=lv.desc;
   document.getElementById('rName').textContent=rName&&rName!=='Anonym'?'Analyseret af: '+rName:'';
   const sb=document.getElementById('sentOk');
-  if(st==='ok'){sb.style.display='flex';sb.innerHTML=`<span style="font-size:1.3rem">✅</span><div><strong>Rapport sendt til ${rEmail}</strong><span style="font-size:.83rem;color:var(--text-mid);">Tjek evt. din spam-mappe. PDF'en er vedhæftet.</span></div>`;}
-  else if(st==='err'){sb.style.display='flex';sb.innerHTML=`<span style="font-size:1.3rem">⚠️</span><div><strong>Email-afsendelse fejlede</strong><span style="font-size:.83rem;color:var(--text-mid);"> <button onclick="dlPDF()" style="background:var(--green);color:white;border:none;padding:.3rem .8rem;cursor:pointer;font-size:.78rem;font-weight:700">Download PDF</button></span></div>`;}
+  if(st==='ok'){sb.style.display='flex';sb.innerHTML=`<span style="font-size:1.3rem">✅</span><div style="flex:1"><strong>Rapport sendt til ${rEmail}</strong><span style="font-size:.83rem;color:var(--text-mid);display:block;margin-top:.2rem">Tjek evt. din spam-mappe. Du kan også downloade den fulde PDF-rapport her: <button onclick="dlPDF()" style="background:var(--green);color:white;border:none;padding:.3rem .8rem;cursor:pointer;font-size:.78rem;font-weight:700;margin-left:.4rem">Download PDF</button></span></div>`;}
+  else if(st==='err'){sb.style.display='flex';sb.innerHTML=`<span style="font-size:1.3rem">⚠️</span><div style="flex:1"><strong>Email-afsendelse fejlede</strong><span style="font-size:.83rem;color:var(--text-mid);display:block;margin-top:.2rem">Du kan i stedet downloade rapporten her: <button onclick="dlPDF()" style="background:var(--green);color:white;border:none;padding:.3rem .8rem;cursor:pointer;font-size:.78rem;font-weight:700;margin-left:.4rem">Download PDF</button></span></div>`;}
+  else if(st==='skipped'){sb.style.display='flex';sb.innerHTML=`<span style="font-size:1.3rem">📄</span><div style="flex:1"><strong>Din rapport er klar</strong><span style="font-size:.83rem;color:var(--text-mid);display:block;margin-top:.2rem">Download den fulde PDF-rapport her: <button onclick="dlPDF()" style="background:var(--green);color:white;border:none;padding:.3rem .8rem;cursor:pointer;font-size:.78rem;font-weight:700;margin-left:.4rem">Download PDF</button></span></div>`;}
   if(rChart) rChart.destroy();
   const ctx=document.getElementById('radarChart').getContext('2d');
   rChart=new Chart(ctx,{type:'radar',data:{labels:DIMS.map(d=>d.name),datasets:[{label:'Score',data:dScores,backgroundColor:'rgba(78,122,46,0.15)',borderColor:'#4e7a2e',borderWidth:2,pointBackgroundColor:'#4e7a2e',pointRadius:4}]},options:{responsive:true,scales:{r:{min:0,max:5,ticks:{stepSize:1,font:{size:9}},pointLabels:{font:{size:10,weight:'700'}},grid:{color:'#e0e0d8'}}},plugins:{legend:{display:false}}}});
@@ -826,22 +827,4 @@ function makeRecs(dims){
     data:         {t:"Definer og mål jeres 3-5 vigtigste KPI'er",     b:"Start enkelt: vælg de tal, der bedst afspejler jeres sundhed. Byg et simpelt dashboard og gennemgå det månedligt."},
     organisation: {t:'Kortlæg roller og deleger beslutninger',        b:'Lav en RACI-matrix for de vigtigste processer. Sæt ord på, hvem der bestemmer hvad — og sørg for alle ved det.'},
     kunder:       {t:'Systematisér jeres kundeindsigt',               b:'Gennemfør 5-10 korte kundeinterviews hvert kvartal. Opsummer indsigterne og brug dem aktivt i produktudvikling og salg.'},
-    tilpasning:   {t:'Sæt tid af til strategisk udvikling',           b:'Blokér fast tid i kalenderen — f.eks. 1 dag om måneden — dedikeret til at arbejde på virksomheden, ikke i den.'},
-  };
-  return sv.map((d,i)=>({...(m[d.id]||{t:d.name,b:''}),p:i<2?'high':i<4?'mid':'low',i:i<2?'🔴':i<4?'🟡':'🟢'}));
-}
-
-function restartAnalyse(){
-  cur=0;ans=new Array(QS.length).fill(null);rName='';rEmail='';
-  document.getElementById('resultsView').style.display='none';
-  document.getElementById('questionView').style.display='block';
-  document.getElementById('progressBlock').style.display='block';
-  document.getElementById('emailForm').style.display='block';
-  document.getElementById('sendingView').style.display='none';
-  document.getElementById('iName').value='';
-  document.getElementById('iEmail').value='';
-  renderQ();
-}
-</script>
-</body>
-</html>
+    til
