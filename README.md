@@ -1,0 +1,2 @@
+# strategisk-analyse
+Strategisk modenhedsanalyse
