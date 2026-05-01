@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="da">
 <head>
 <meta charset="UTF-8">
@@ -197,6 +197,7 @@ const EJ = {
   serviceId:      'service_oxaxaj7',
   tmplRespondent: 'template_7n9owy7',
   tmplAdmin:      'template_d6uttw9',
+  tmplContact:    '',
   adminEmail:     'christian@oxland.dk',
 };
 const ejReady = !Object.values(EJ).some(v => String(v).startsWith('DIN_'));
@@ -359,16 +360,17 @@ catch(e) { console.warn('EmailJS init failed:', e); }
     <h2 class="section-title">Book en strategisk<br>samtale</h2>
     <p class="section-body" style="margin-bottom:2.5rem;">Rapporten er et godt afsæt — men den rigtige indsigt opstår i samtalen. Kontakt mig for en uforpligtende dialog om, hvad analysen betyder for netop jeres virksomhed.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-      <div class="form-row"><label>Fornavn</label><input type="text" placeholder="Fornavn"></div>
-      <div class="form-row"><label>Efternavn</label><input type="text" placeholder="Efternavn"></div>
+      <div class="form-row"><label>Fornavn</label><input type="text" id="kFirstname" placeholder="Fornavn"></div>
+      <div class="form-row"><label>Efternavn</label><input type="text" id="kLastname" placeholder="Efternavn"></div>
     </div>
-    <div class="form-row"><label>Email Adresse</label><input type="email" placeholder="din@email.dk"></div>
-    <div class="form-row"><label>Telefon</label><input type="tel" placeholder="+45 00 00 00 00"></div>
+    <div class="form-row"><label>Email Adresse <span style="color:#c0392b">*</span></label><input type="email" id="kEmail" placeholder="din@email.dk"></div>
+    <div class="form-row"><label>Telefon</label><input type="tel" id="kPhone" placeholder="+45 00 00 00 00"></div>
     <div class="form-row">
-      <label>Besked</label>
-      <textarea rows="4" style="width:100%;padding:.75rem 1rem;border:1px solid var(--border);font-family:inherit;font-size:.92rem;resize:vertical;" placeholder="Hvad vil du gerne tale om?"></textarea>
+      <label>Besked <span style="color:#c0392b">*</span></label>
+      <textarea rows="4" id="kMessage" style="width:100%;padding:.75rem 1rem;border:1px solid var(--border);font-family:inherit;font-size:.92rem;resize:vertical;" placeholder="Hvad vil du gerne tale om?"></textarea>
     </div>
-    <button class="btn-submit" style="margin-top:.5rem;">Send →</button>
+    <div id="kStatus" style="display:none;font-size:.88rem;margin-top:.8rem;padding:.7rem 1rem;border-radius:2px;"></div>
+    <button id="kSubmit" class="btn-submit" style="margin-top:.5rem;" onclick="submitContact()">Send →</button>
   </div>
 </section>
 
@@ -764,6 +766,69 @@ function makeRecs(dims){
     const base=m[d.id]||{t:d.name,b:''};
     return Object.assign({},base,{p:i<2?'high':i<4?'mid':'low',i:i<2?'●':i<4?'●':'●'});
   });
+}
+
+async function submitContact(){
+  const fn=document.getElementById('kFirstname').value.trim();
+  const ln=document.getElementById('kLastname').value.trim();
+  const em=document.getElementById('kEmail').value.trim();
+  const ph=document.getElementById('kPhone').value.trim();
+  const ms=document.getElementById('kMessage').value.trim();
+  const status=document.getElementById('kStatus');
+  const btn=document.getElementById('kSubmit');
+  status.style.display='none';
+  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){
+    status.textContent='Indtast venligst en gyldig email-adresse.';
+    status.style.background='#fde2e2'; status.style.color='#c0392b';
+    status.style.display='block'; return;
+  }
+  if(!ms){
+    status.textContent='Skriv venligst en besked.';
+    status.style.background='#fde2e2'; status.style.color='#c0392b';
+    status.style.display='block'; return;
+  }
+  const fullName=(fn+' '+ln).trim()||'(ikke angivet)';
+  const phone=ph||'(ikke angivet)';
+  const today=new Date().toLocaleDateString('da-DK',{day:'numeric',month:'long',year:'numeric'});
+  if(ejReady && EJ.tmplContact && typeof emailjs!=='undefined'){
+    btn.disabled=true; const old=btn.textContent; btn.textContent='Sender…';
+    try {
+      await emailjs.send(EJ.serviceId, EJ.tmplContact, {
+        admin_email: EJ.adminEmail,
+        contact_name: fullName,
+        contact_email: em,
+        contact_phone: phone,
+        message: ms,
+        date: today
+      });
+      status.textContent='✓ Tak — din henvendelse er sendt. Jeg vender tilbage hurtigst muligt.';
+      status.style.background='#f0f5eb'; status.style.color='var(--green-dark)';
+      status.style.display='block';
+      document.getElementById('kFirstname').value='';
+      document.getElementById('kLastname').value='';
+      document.getElementById('kEmail').value='';
+      document.getElementById('kPhone').value='';
+      document.getElementById('kMessage').value='';
+      btn.textContent=old;
+      setTimeout(function(){btn.disabled=false;},2000);
+      return;
+    } catch(e){
+      console.warn('EmailJS contact failed, fallback to mailto:',e);
+      btn.textContent=old; btn.disabled=false;
+    }
+  }
+  const subject=encodeURIComponent('Henvendelse fra strategisk-analyse');
+  const body=encodeURIComponent(
+    'Navn: '+fullName+'\n'+
+    'Email: '+em+'\n'+
+    'Telefon: '+phone+'\n\n'+
+    'Besked:\n'+ms+'\n\n'+
+    '--\nSendt via strategisk-analyse-formularen'
+  );
+  window.location.href='mailto:'+EJ.adminEmail+'?subject='+subject+'&body='+body;
+  status.textContent='Åbner dit email-program… Hvis intet sker, kan du sende din besked direkte til '+EJ.adminEmail;
+  status.style.background='#fff8e1'; status.style.color='#7a5a00';
+  status.style.display='block';
 }
 
 function restartAnalyse(){
